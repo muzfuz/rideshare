@@ -3,11 +3,11 @@ services:
     image: postgres:16.1
     restart: always
     ports:
-      - "54321:5432"
+      - "5432:5432"
     volumes:
       - ./postgres-docker/db01:/var/lib/postgresql
       - /var/run/postgresql:/var/run/postgresql
-      - .postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust # literally accept any connection yolo
       POSTGRES_USER: postgres
