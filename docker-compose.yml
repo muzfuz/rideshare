@@ -5,15 +5,16 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres-docker/db01:/var/lib/postgresql
-      - /var/run/postgresql:/var/run/postgresql
+      - postgres_data:/var/lib/postgresql  # Named volume for database persistence
+      - ./postgresql/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-      POSTGRES_HOST_AUTH_METHOD: trust # literally accept any connection yolo
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     networks:
       - rideshare-net
+
   pgadmin:
     image: dpage/pgadmin4
     restart: always
@@ -23,7 +24,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
-      - ./pgadmin-data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin  # Named volume for pgAdmin persistence
     depends_on:
       - db01
     networks:
@@ -31,4 +32,7 @@ services:
 
 networks:
   rideshare-net:
-    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:
