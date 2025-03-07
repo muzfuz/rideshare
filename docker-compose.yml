@@ -5,15 +5,18 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql  # Named volume for database persistence
-      - ./postgresql/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
-      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres-docker/db01:/var/lib/postgresql/data  # Local directory for database storage
+      - ./postgres-docker/postgresql.conf:/etc/postgresql/postgresql.conf  # Custom config outside data dir
+      - ./postgres-docker/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - ./postgres-docker/init.sql:/docker-entrypoint-initdb.d/init.sql  # One-time init script
     environment:
+      PGDATA: /var/lib/postgresql/data
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     networks:
       - rideshare-net
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]  # Tell Postgres where to find config
 
   pgadmin:
     image: dpage/pgadmin4
@@ -24,7 +27,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
-      - pgadmin_data:/var/lib/pgadmin  # Named volume for pgAdmin persistence
+      - ./pgadmin-data:/var/lib/pgadmin  # Persist pgAdmin settings
     depends_on:
       - db01
     networks:
@@ -32,7 +35,4 @@ services:
 
 networks:
   rideshare-net:
-
-volumes:
-  postgres_data:
-  pgadmin_data:
+    driver: bridge
